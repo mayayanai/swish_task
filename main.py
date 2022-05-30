@@ -7,6 +7,8 @@ import multiprocessing
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from tensorflow.python.client import device_lib
+import psutil
+from hurry.filesize import size
 
 def print_datetime():
     print(datetime.utcnow())
@@ -43,6 +45,9 @@ def print_GPU_type():
     if GPU_count == 0:
         print("No GPU found")
 
+def print_memory_size():
+    print(size(psutil.virtual_memory()[0]))
+
 if __name__ == '__main__':
     print_datetime()
     print_interfaces()
@@ -51,3 +56,4 @@ if __name__ == '__main__':
     print_CPU_model()
     print_core_number()
     print_GPU_type()
+    print_memory_size()
