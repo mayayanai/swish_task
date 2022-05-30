@@ -1,3 +1,4 @@
+from flask import Flask, jsonify
 from datetime import datetime
 from netifaces import interfaces, ifaddresses, AF_INET
 import netifaces
@@ -10,50 +11,67 @@ from tensorflow.python.client import device_lib
 import psutil
 from hurry.filesize import size
 
-def print_datetime():
-    print(datetime.utcnow())
 
-def print_interfaces():
-    print(netifaces.interfaces())
+app = Flask(__name__)
+
+@app.route('/')
+def return_info():
+    return prepare_response()
 
 
-def print_fisrt_ip():
+def get_datetime():
+    return datetime.utcnow()
+
+def get_interfaces():
+    return netifaces.interfaces()
+
+
+def get_first_ip():
     for ifaceName in interfaces():
         addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr': 'No IP addr'}])]
-    for address in addresses:
-        if address != "127.0.0.1" and address != "No IP addr":
-            print(address)
-            break
+        for address in addresses:
+            if address != "127.0.0.1" and address != "No IP addr":
+                return (address)
 
-def print_external_ip():
+
+def get_external_ip():
     response = requests.get('https://ident.me',timeout=10)
-    print(response.content.decode("utf-8"))
+    return response.content.decode("utf-8")
 
-def print_CPU_model():
-    print(platform.processor())
+def get_CPU_model():
+    return platform.processor()
 
-def print_core_number():
-    print(multiprocessing.cpu_count())
+def get_core_number():
+    return multiprocessing.cpu_count()
 
-def print_GPU_type():
+def get_GPU_type():
     local_device_protos = device_lib.list_local_devices()
     GPU_count =0
+    GPU_list = []
     for x in local_device_protos:
         if x.device_type == 'GPU':
             GPU_count += 1
-            print (x.name)
+            GPU_list.append(x)
     if GPU_count == 0:
-        print("No GPU found")
+        return "No GPU found"
+    return GPU_list
 
-def print_memory_size():
-    print(size(psutil.virtual_memory()[0]))
+def get_memory_size():
+    return size(psutil.virtual_memory()[0])
+
+def prepare_response():
+    return jsonify(
+        date_and_time=get_datetime(),
+        interfaces=get_interfaces(),
+        first_ip=get_first_ip(),
+        external_ip=get_external_ip(),
+        cpu_model=get_CPU_model(),
+        core_number=get_core_number(),
+        GPU_type=get_GPU_type(),
+        memory_size=get_memory_size()
+    )
+
 
 if __name__ == '__main__':
-    print_datetime()
-    print_interfaces()
-    print_fisrt_ip()
-    print_external_ip()
-    print_CPU_model()
-    print_core_number()
-    print_GPU_type()
-    print_memory_size()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
