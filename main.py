@@ -4,6 +4,9 @@ import netifaces
 import requests
 import platform
 import multiprocessing
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from tensorflow.python.client import device_lib
 
 def print_datetime():
     print(datetime.utcnow())
@@ -30,6 +33,16 @@ def print_CPU_model():
 def print_core_number():
     print(multiprocessing.cpu_count())
 
+def print_GPU_type():
+    local_device_protos = device_lib.list_local_devices()
+    GPU_count =0
+    for x in local_device_protos:
+        if x.device_type == 'GPU':
+            GPU_count += 1
+            print (x.name)
+    if GPU_count == 0:
+        print("No GPU found")
+
 if __name__ == '__main__':
     print_datetime()
     print_interfaces()
@@ -37,3 +50,4 @@ if __name__ == '__main__':
     print_external_ip()
     print_CPU_model()
     print_core_number()
+    print_GPU_type()
