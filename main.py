@@ -7,7 +7,7 @@ import platform
 import multiprocessing
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from tensorflow.python.client import device_lib
+import GPUtil
 import psutil
 from hurry.filesize import size
 
@@ -45,13 +45,10 @@ def get_core_number():
     return multiprocessing.cpu_count()
 
 def get_GPU_type():
-    local_device_protos = device_lib.list_local_devices()
     GPU_count =0
-    GPU_list = []
-    for x in local_device_protos:
-        if x.device_type == 'GPU':
-            GPU_count += 1
-            GPU_list.append(x)
+    GPU_list = GPUtil.getAvailable()
+    for x in GPU_list:
+        GPU_count += 1
     if GPU_count == 0:
         return "No GPU found"
     return GPU_list
