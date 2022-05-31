@@ -2,7 +2,7 @@ flask
 datetime
 netifaces
 requests
-psutil
 hurry.filesize==0.9
-GPUtil
 multiprocess
+GPUtil
+psutil
